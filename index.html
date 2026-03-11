@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Energia Alerta</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f6f9;
+        margin: 0;
+        padding: 0;
+    }
+
+    header {
+        background:linear-gradient(#ff9800, #ff5722) ;
+        color: white;
+        text-align: center;
+        padding: 15px;
+        font-size: 22px;
+        font-weight: bold;
+        justify-content: space-between;
+        display: flex;
+    }
+
+    .container {
+        padding: 20px;
+        max-width: 500px;
+        margin: auto;
+    }
+
+    label {
+        font-weight: bold;
+    }
+
+    input, select, textarea {
+        width: 100%;
+        padding: 8px;
+        margin: 8px 0 15px 0;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+
+    button {
+        background-color: #ff9800;
+        color: white;
+        border: none;
+        padding: 10px;
+        width: 100%;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #e68900;
+    }
+
+    .report-list {
+        margin-top: 20px;
+    }
+
+    .report {
+        background: white;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .status {
+        font-weight: bold;
+        color: red;
+    }
+     a{
+        text-decoration-line: none;
+        text-decoration-color: white;
+    }
+</style>
+</head>
+
+<body>
+
+<header>
+    <div>
+        <a href="EDM3.html">⬅</a> 
+</div>
+<h3>  Reportar problema </h3>
+<img src="EUNICE-removebg-preview.png" alt="" width="7%">
+</header>
+<br><br><br><br><br><br><br>
+
+<div class="container">
+
+    <h3>Reportar problema</h3>
+
+    <label>Nome</label>
+    <input type="text" id="nome">
+
+     <label>Numero de contador</label>
+    <input type="text" id="contador1" placeholder="Digite o numero do  contador" maxlength="11" minlength="11" required>
+
+    <label>Confirmar Numero de contador</label>
+    <input type="text" id="contador2" placeholder="Digite o numero do  contador" maxlength="11" minlength="11" required>
+
+
+
+    <label>Bairro</label>
+    <input type="text" id="bairro">
+
+   
+
+    <label>Tipo de Problema</label>
+    <select id="tipo">
+        <option>selecione</option>
+        <option>Falta de energia</option>
+        <option>Poste danificado</option>
+        <option>Cabo caído</option>
+        <option>Transformador com problema</option>
+        <option>Curto-circuito</option>
+        <option>Outro</option>
+    </select>
+
+    <label>Descrição</label>
+    <textarea id="descricao"></textarea>
+
+    <label>Descrição por voz</label>
+<button type="button" onclick="iniciarGravacao()">🎤 Gravar voz</button>
+<p id="statusGravacao"></p>
+
+     <label>Foto (opcional)</label>
+    <input type="file" id="foto" accept="image/*">
+
+    <button>Enviar Denúncia</button>
+
+    <div id="mensagem" style="margin-top:15px; padding:10px; border-radius:5px; display:none;"></div>
+
+
+</div>
+
+<script>
+
+document.querySelector("button").addEventListener("click", function(e){
+    e.preventDefault();
+
+    let mensagem = document.getElementById("mensagem");
+    mensagem.style.display = "none";
+
+    let nome = document.getElementById("nome").value.trim();
+    let contadores = document.querySelectorAll("#contador");
+    let contador1 = document.getElementById("contador1").value.trim();
+    let contador2 = document.getElementById("contador2").value.trim();
+    let bairro = document.getElementById("bairro").value.trim();
+    let tipo = document.getElementById("tipo").value;
+    let descricao = document.getElementById("descricao").value.trim();
+    let fotoInput = document.getElementById("foto");
+
+    if(nome === "") nome = "Anônimo";
+
+    // Validação contador
+    if(contador1.length !== 11 || !/^\d+$/.test(contador1)){
+        mostrarMensagem("O número do contador deve ter 11 dígitos numéricos.", "erro");
+        return;
+    }
+
+    if(contador1 !== contador2){
+        mostrarMensagem("Os números de contador não coincidem.", "erro");
+        return;
+    }
+
+    if(bairro === "" || descricao === ""){
+        mostrarMensagem("Preencha todos os campos obrigatórios.", "erro");
+        return;
+    }
+
+    let leitor = new FileReader();
+
+    if(fotoInput.files.length > 0){
+        leitor.onload = function(){
+            salvar(nome, contador1, bairro, tipo, descricao, leitor.result);
+        };
+        leitor.readAsDataURL(fotoInput.files[0]);
+    } else {
+        salvar(nome, contador1, bairro, tipo, descricao, null);
+    }
+
+});
+
+
+function salvar(nome, contador, bairro, tipo, descricao, foto, audio){
+
+    let denuncias = JSON.parse(localStorage.getItem("denunciasEnergia")) || [];
+
+    let nova = {
+        nome: nome,
+        contador: contador,
+        bairro: bairro,
+        tipo: tipo,
+        descricao: descricao,
+        foto: foto,
+        status: "pendente",
+        data: new Date().toLocaleString()
+    };
+
+    denuncias.push(nova);
+
+    // 🔎 VERIFICAR SE EXISTEM 3 DENÚNCIAS DO MESMO PROBLEMA
+    let ocorrencias = denuncias.filter(d =>
+        d.tipo === tipo &&
+        d.bairro.toLowerCase() === bairro.toLowerCase()
+    );
+
+    // Contar pessoas diferentes
+    let pessoasDiferentes = [...new Set(ocorrencias.map(d => d.nome))];
+
+    if(ocorrencias.length >= 3 || pessoasDiferentes.length >= 3){
+
+        // Atualiza status para urgente
+        ocorrencias.forEach(d => d.status = "URGENTE");
+
+        mostrarMensagem("⚠️ ALERTA DE URGÊNCIA! Este problema foi reportado 3 vezes.", "urgente");
+    }
+    else{
+        mostrarMensagem("Denúncia enviada com sucesso!", "sucesso");
+    }
+
+    localStorage.setItem("denunciasEnergia", JSON.stringify(denuncias));
+
+    // Limpar campos
+    document.getElementById("nome").value = "";
+    document.querySelectorAll("#contador1").value = "";
+    document.querySelectorAll("#contador2").value = "";
+    document.getElementById("bairro").value = "";
+    document.getElementById("descricao").value = "";
+    document.querySelector("input[type='file']").value = "";
+}
+
+
+function mostrarMensagem(texto, tipo){
+    let mensagem = document.getElementById("mensagem");
+
+    mensagem.style.display = "block";
+    mensagem.textContent = texto;
+
+    if(tipo === "erro"){
+        mensagem.style.backgroundColor = "#f8d7da";
+        mensagem.style.color = "#721c24";
+        mensagem.style.border = "1px solid #f5c6cb";
+    }
+    else if(tipo === "urgente"){
+        mensagem.style.backgroundColor = "#ff0000";
+        mensagem.style.color = "white";
+        mensagem.style.border = "2px solid darkred";
+        mensagem.style.fontWeight = "bold";
+    }
+    else{
+        mensagem.style.backgroundColor = "#d4edda";
+        mensagem.style.color = "#155724";
+        mensagem.style.border = "1px solid #c3e6cb";
+    }
+}
+// Reconhecimento de voz
+let reconhecimento;
+let gravando = false;
+
+if ('webkitSpeechRecognition' in window) {
+
+    reconhecimento = new webkitSpeechRecognition();
+
+    reconhecimento.lang = "pt-PT";
+    reconhecimento.continuous = false;
+    reconhecimento.interimResults = false;
+
+    reconhecimento.onstart = function(){
+        gravando = true;
+        document.getElementById("statusGravacao").innerText = "🎤 Gravando...";
+    };
+
+    reconhecimento.onresult = function(event){
+
+        let texto = event.results[0][0].transcript;
+
+        let campoDescricao = document.getElementById("descricao");
+
+        campoDescricao.value = campoDescricao.value + " " + texto;
+
+        document.getElementById("statusGravacao").innerText = "✅ Voz convertida em texto";
+    };
+
+    reconhecimento.onerror = function(){
+        document.getElementById("statusGravacao").innerText = "Erro ao reconhecer voz";
+    };
+
+    reconhecimento.onend = function(){
+        gravando = false;
+    };
+
+}
+
+function iniciarGravacao(){
+
+    if(!reconhecimento){
+        alert("Seu navegador não suporta reconhecimento de voz.");
+        return;
+    }
+
+    if(!gravando){
+        reconhecimento.start();
+    }
+
+}
+
+</script>
+
+
+</body>
+
+
+</html>
