@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Energia Alerta</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to bottom right, #eee3c2, white);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: black;
+    text-align: center;
+    overflow: hidden;
+}
+
+.container {
+    padding: 20px;
+    animation: fadeIn 1.5s ease-in-out;
+}
+
+.logo img{
+    width:140px;
+    max-width:90%;
+    height:auto;
+    object-fit:contain;
+    image-rendering: auto;
+    filter: drop-shadow(0 8px 15px rgba(0,0,0,0.3));
+    transition: transform 0.4s ease;
+}
+
+.logo img:hover{
+    transform: scale(1.08);
+}
+
+h1 {
+    margin: 15px 0 10px;
+    font-size: 32px;
+}
+
+p {
+    font-size: 18px;
+    margin-bottom: 35px;
+}
+
+button {
+    background: white;
+    color: #ff5722;
+    border: none;
+    padding: 15px 35px;
+    border-radius: 30px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+button:hover {
+    background: #ffe0b2;
+    transform: scale(1.05);
+}
+
+button:active{
+    transform: scale(0.95);
+}
+
+footer {
+    position: absolute;
+    bottom: 10px;
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+/* Animação */
+@keyframes fadeIn{
+    from{opacity:0; transform: translateY(20px);}
+    to{opacity:1; transform: translateY(0);}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="logo">
+        <img id="logoImg" src="JAI-removebg-preview.png" alt="Logo Energia Alerta">
+    </div>
+
+    <h1>Energia Alerta</h1>
+    <p>Reporte problemas de energia na sua comunidade e ajude a melhorar o seu bairro.</p>
+
+    <button onclick="entrar()">Entrar</button>
+</div>
+
+<footer>
+    © 2026 Energia Alerta
+</footer>
+
+<script>
+
+// Pré-carregamento da imagem para melhor qualidade percebida
+window.addEventListener("load", function(){
+    const img = document.getElementById("logoImg");
+    const highQuality = new Image();
+    highQuality.src = img.src;
+});
+
+// Função de entrada
+function entrar(){
+    const btn = document.querySelector("button");
+    btn.textContent = "Carregando...";
+    btn.disabled = true;
+
+    setTimeout(function(){
+        window.location.href = "EDM3.html";
+    }, 800);
+}
+
+</script>
+
+</body>
+</html>

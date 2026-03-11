@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energia Alerta</title>
+
+<style>
+body{
+    margin:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    background:#000;
+}
+
+img{
+    width:100%;
+    max-width:900px;
+    height:auto;
+    object-fit:cover;
+    image-rendering: auto;
+    border-radius:10px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.6);
+    animation: fadeIn 1.5s ease-in-out;
+}
+
+/* Animação suave */
+@keyframes fadeIn{
+    from{opacity:0;}
+    to{opacity:1;}
+}
+
+.contador{
+    position:absolute;
+    bottom:20px;
+    color:white;
+    font-family:Arial;
+    font-size:14px;
+}
+</style>
+</head>
+
+<body>
+
+<img src="RUTH.jpg" alt="Imagem de Apresentação">
+
+<div class="contador" id="contadorTexto">
+    Redirecionando em 5 segundos...
+</div>
+
+<script>
+
+// Redirecionamento controlado por JavaScript
+let tempo = 5;
+let contador = document.getElementById("contadorTexto");
+
+let intervalo = setInterval(function(){
+    tempo--;
+    contador.textContent = "Redirecionando em " + tempo + " segundos...";
+
+    if(tempo <= 0){
+        clearInterval(intervalo);
+        window.location.href = "EDM2.html";
+    }
+}, 1000);
+
+</script>
+
+</body>
+</html>
